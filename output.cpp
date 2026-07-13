@@ -3,19 +3,11 @@
 using namespace std;
 
 
-void greet()
-{
-    cout << "Hello from function" << endl;
-}
-
 int main()
 {
-    cout << "Start" << endl;
-    greet();
-    for(int i = 0; i < 2; i++)
-    {
-        cout << "Loop" << endl;
-    }
-    cout << "End" << endl;
+    int status = 13;
+    digitalWrite(status, HIGH);
+    delay(1000);
+    digitalWrite(status, LOW);
     return 0;
 }

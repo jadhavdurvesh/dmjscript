@@ -1,13 +1,5 @@
-function greet
-    show "Hello from function"
-end
+led status = 13
 
-show "Start"
-
-call greet
-
-repeat 2
-    show "Loop"
-end
-
-show "End"
+on status
+wait 1000
+off status

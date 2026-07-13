@@ -177,6 +177,106 @@ int main()
             }
         }
 
+        /* led */
+
+if(strncmp(line, "led ", 4) == 0)
+{
+    char name[50];
+    int pin;
+
+    if(sscanf(line,
+              "led %s = %d",
+              name,
+              &pin) == 2)
+    {
+        writeIndentToBuffer(target,
+                            *indent);
+
+        char temp[200];
+
+        sprintf(temp,
+                "int %s = %d;\n",
+                name,
+                pin);
+
+        strcat(target, temp);
+    }
+
+    continue;
+}
+/* on */
+
+if(strncmp(line, "on ", 3) == 0)
+{
+    char name[50];
+
+    if(sscanf(line,
+              "on %s",
+              name) == 1)
+    {
+        writeIndentToBuffer(target,
+                            *indent);
+
+        char temp[200];
+
+        sprintf(temp,
+                "digitalWrite(%s, HIGH);\n",
+                name);
+
+        strcat(target, temp);
+    }
+
+    continue;
+}
+/* off */
+
+if(strncmp(line, "off ", 4) == 0)
+{
+    char name[50];
+
+    if(sscanf(line,
+              "off %s",
+              name) == 1)
+    {
+        writeIndentToBuffer(target,
+                            *indent);
+
+        char temp[200];
+
+        sprintf(temp,
+                "digitalWrite(%s, LOW);\n",
+                name);
+
+        strcat(target, temp);
+    }
+
+    continue;
+}
+/* wait */
+
+if(strncmp(line, "wait ", 5) == 0)
+{
+    int ms;
+
+    if(sscanf(line,
+              "wait %d",
+              &ms) == 1)
+    {
+        writeIndentToBuffer(target,
+                            *indent);
+
+        char temp[200];
+
+        sprintf(temp,
+                "delay(%d);\n",
+                ms);
+
+        strcat(target, temp);
+    }
+
+    continue;
+}
+
         /* show text */
 
         if(strncmp(line, "show \"", 6) == 0)
