@@ -1,13 +1,12 @@
-show "DMJScript v0.6 Test"
+show "Math Test"
 
-var age = 17
+var a = 10
+var b = 20
 
-if age >= 18 then
-    show "Adult"
-else
-    show "Minor"
-end
+var total = a + b
+var diff = b - a
+var mul = a * b
 
-repeat 3
-    show "Hello"
-end
+show total
+show diff
+show mul

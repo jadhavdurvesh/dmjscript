@@ -4,20 +4,15 @@ using namespace std;
 
 int main()
 {
-    cout << "DMJScript v0.6 Test" << endl;
-    int age = 17;
-    if(age >= 18)
-    {
-        cout << "Adult" << endl;
-    }
-    else
-    {
-        cout << "Minor" << endl;
-    }
-    for(int i = 0; i < 3; i++)
-    {
-        cout << "Hello" << endl;
-    }
+    cout << "Math Test" << endl;
+    int a = 10;
+    int b = 20;
+    int total = a + b;
+    int diff = b - a;
+    int mul = a * b;
+    cout << total << endl;
+    cout << diff << endl;
+    cout << mul << endl;
 
     return 0;
 }

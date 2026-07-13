@@ -65,11 +65,42 @@ int main()
 
                 continue;
             }
+char expr[200];
 
-            if(sscanf(line,
-                      "var %s = %s",
-                      name,
-                      value) == 2)
+if(sscanf(line,
+          "var %s = %[^\n]",
+          name,
+          expr) == 2)
+{
+    writeIndent(out, indent);
+
+    if(strchr(expr, '+') ||
+       strchr(expr, '-') ||
+       strchr(expr, '*') ||
+       strchr(expr, '/'))
+    {
+        fprintf(out,
+                "int %s = %s;\n",
+                name,
+                expr);
+    }
+    else if(strchr(expr, '.'))
+    {
+        fprintf(out,
+                "double %s = %s;\n",
+                name,
+                expr);
+    }
+    else
+    {
+        fprintf(out,
+                "int %s = %s;\n",
+                name,
+                expr);
+    }
+
+    continue;
+}
             {
                 writeIndent(out, indent);
 
