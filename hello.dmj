@@ -1,9 +1,13 @@
--- Number Test
+show "DMJScript v0.6 Test"
 
-var name = "Durvesh"
 var age = 17
-var voltage = 4.75
 
-show name
-show age
-show voltage
+if age >= 18 then
+    show "Adult"
+else
+    show "Minor"
+end
+
+repeat 3
+    show "Hello"
+end

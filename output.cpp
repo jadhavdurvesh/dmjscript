@@ -4,12 +4,20 @@ using namespace std;
 
 int main()
 {
-    string name = "Durvesh";
+    cout << "DMJScript v0.6 Test" << endl;
     int age = 17;
-    double voltage = 4.75;
-    cout << name << endl;
-    cout << age << endl;
-    cout << voltage << endl;
+    if(age >= 18)
+    {
+        cout << "Adult" << endl;
+    }
+    else
+    {
+        cout << "Minor" << endl;
+    }
+    for(int i = 0; i < 3; i++)
+    {
+        cout << "Hello" << endl;
+    }
 
     return 0;
 }

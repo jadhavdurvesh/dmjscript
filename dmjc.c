@@ -1,6 +1,14 @@
 #include <stdio.h>
 #include <string.h>
 
+void writeIndent(FILE *out, int indent)
+{
+    for(int i = 0; i < indent; i++)
+    {
+        fprintf(out, "    ");
+    }
+}
+
 int main()
 {
     FILE *src = fopen("hello.dmj", "r");
@@ -18,11 +26,22 @@ int main()
     fprintf(out, "using namespace std;\n\n");
     fprintf(out, "int main()\n{\n");
 
+    int indent = 1;
+
     char line[256];
 
     while(fgets(line, sizeof(line), src))
     {
-        /* Skip comments */
+        line[strcspn(line, "\n")] = 0;
+
+        if(strlen(line) == 0)
+            continue;
+
+        while(line[0] == ' ' || line[0] == '\t')
+        {
+            memmove(line, line + 1, strlen(line));
+        }
+
         if(strncmp(line, "--", 2) == 0)
             continue;
 
@@ -32,37 +51,39 @@ int main()
             char name[50];
             char value[200];
 
-            /* String */
             if(sscanf(line,
                       "var %s = \"%[^\"]\"",
                       name,
                       value) == 2)
             {
+                writeIndent(out, indent);
+
                 fprintf(out,
-                        "    string %s = \"%s\";\n",
+                        "string %s = \"%s\";\n",
                         name,
                         value);
 
                 continue;
             }
 
-            /* Number */
             if(sscanf(line,
                       "var %s = %s",
                       name,
                       value) == 2)
             {
+                writeIndent(out, indent);
+
                 if(strchr(value, '.'))
                 {
                     fprintf(out,
-                            "    double %s = %s;\n",
+                            "double %s = %s;\n",
                             name,
                             value);
                 }
                 else
                 {
                     fprintf(out,
-                            "    int %s = %s;\n",
+                            "int %s = %s;\n",
                             name,
                             value);
                 }
@@ -80,15 +101,17 @@ int main()
                       "show \"%[^\"]\"",
                       text) == 1)
             {
+                writeIndent(out, indent);
+
                 fprintf(out,
-                        "    cout << \"%s\" << endl;\n",
+                        "cout << \"%s\" << endl;\n",
                         text);
             }
 
             continue;
         }
 
-        /* ask variable */
+        /* ask */
         if(strncmp(line, "ask ", 4) == 0)
         {
             char name[50];
@@ -97,12 +120,95 @@ int main()
                       "ask %s",
                       name) == 1)
             {
+                writeIndent(out, indent);
                 fprintf(out,
-                        "    string %s;\n"
-                        "    getline(cin, %s);\n",
-                        name,
+                        "string %s;\n",
+                        name);
+
+                writeIndent(out, indent);
+                fprintf(out,
+                        "getline(cin, %s);\n",
                         name);
             }
+
+            continue;
+        }
+
+        /* if */
+        if(strncmp(line, "if ", 3) == 0)
+        {
+            char condition[200];
+
+            strcpy(condition, line + 3);
+
+            char *thenPos = strstr(condition, " then");
+
+            if(thenPos != NULL)
+                *thenPos = '\0';
+
+            writeIndent(out, indent);
+            fprintf(out,
+                    "if(%s)\n",
+                    condition);
+
+            writeIndent(out, indent);
+            fprintf(out, "{\n");
+
+            indent++;
+
+            continue;
+        }
+
+        /* else */
+        if(strcmp(line, "else") == 0)
+        {
+            indent--;
+
+            writeIndent(out, indent);
+            fprintf(out, "}\n");
+
+            writeIndent(out, indent);
+            fprintf(out, "else\n");
+
+            writeIndent(out, indent);
+            fprintf(out, "{\n");
+
+            indent++;
+
+            continue;
+        }
+
+        /* repeat */
+        if(strncmp(line, "repeat ", 7) == 0)
+        {
+            int count;
+
+            if(sscanf(line,
+                      "repeat %d",
+                      &count) == 1)
+            {
+                writeIndent(out, indent);
+
+                fprintf(out,
+                        "for(int i = 0; i < %d; i++)\n",
+                        count);
+
+                writeIndent(out, indent);
+                fprintf(out, "{\n");
+
+                indent++;
+            }
+
+            continue;
+        }
+
+        /* end */
+        if(strcmp(line, "end") == 0)
+        {
+            indent--;
+
+            writeIndent(out, indent);
+            fprintf(out, "}\n");
 
             continue;
         }
@@ -117,8 +223,10 @@ int main()
                       "show %s",
                       name) == 1)
             {
+                writeIndent(out, indent);
+
                 fprintf(out,
-                        "    cout << %s << endl;\n",
+                        "cout << %s << endl;\n",
                         name);
             }
 
@@ -126,7 +234,11 @@ int main()
         }
     }
 
-    fprintf(out, "\n    return 0;\n");
+    fprintf(out, "\n");
+
+    writeIndent(out, 1);
+    fprintf(out, "return 0;\n");
+
     fprintf(out, "}\n");
 
     fclose(src);
