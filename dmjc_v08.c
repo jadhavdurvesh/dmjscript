@@ -276,7 +276,70 @@ if(strncmp(line, "wait ", 5) == 0)
 
     continue;
 }
+/* servo */
 
+if(strncmp(line, "servo ", 6) == 0)
+{
+    char name[50];
+    int pin;
+
+    if(sscanf(line,
+              "servo %s = %d",
+              name,
+              &pin) == 2)
+    {
+        writeIndentToBuffer(target,
+                            *indent);
+
+        char temp[300];
+
+        sprintf(temp,
+                "Servo %s;\n",
+                name);
+
+        strcat(target, temp);
+
+        writeIndentToBuffer(target,
+                            *indent);
+
+        sprintf(temp,
+                "%s.attach(%d);\n",
+                name,
+                pin);
+
+        strcat(target, temp);
+    }
+
+    continue;
+}
+
+/* move */
+
+if(strncmp(line, "move ", 5) == 0)
+{
+    char name[50];
+    int angle;
+
+    if(sscanf(line,
+              "move %s %d",
+              name,
+              &angle) == 2)
+    {
+        writeIndentToBuffer(target,
+                            *indent);
+
+        char temp[200];
+
+        sprintf(temp,
+                "%s.write(%d);\n",
+                name,
+                angle);
+
+        strcat(target, temp);
+    }
+
+    continue;
+}
         /* show text */
 
         if(strncmp(line, "show \"", 6) == 0)

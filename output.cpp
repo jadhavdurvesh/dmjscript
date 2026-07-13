@@ -5,9 +5,12 @@ using namespace std;
 
 int main()
 {
-    int status = 13;
-    digitalWrite(status, HIGH);
+    Servo arm;
+    arm.attach(9);
+    arm.write(0);
     delay(1000);
-    digitalWrite(status, LOW);
+    arm.write(90);
+    delay(1000);
+    arm.write(180);
     return 0;
 }

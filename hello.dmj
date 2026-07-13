@@ -1,5 +1,9 @@
-led status = 13
+servo arm = 9
 
-on status
+move arm 0
 wait 1000
-off status
+
+move arm 90
+wait 1000
+
+move arm 180
