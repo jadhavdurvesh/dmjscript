@@ -30,7 +30,11 @@ int main()
     char functions[BUFFER_SIZE] = "";
     char mainCode[BUFFER_SIZE] = "";
 
+    char ledPins[50][50];
+int ledPinNumbers[50];
+int ledCount = 0;
     int inFunction = 0;
+    int arduinoMode = 0;
 
     char line[256];
     char currentFunction[50];
@@ -60,7 +64,13 @@ int main()
 
         int *indent =
             inFunction ? &functionIndent : &mainIndent;
+/* hardware */
 
+if(strcmp(line, "hardware arduino") == 0)
+{
+    arduinoMode = 1;
+    continue;
+}
         /* function */
 
         if(strncmp(line, "function ", 9) == 0)
@@ -177,7 +187,7 @@ int main()
             }
         }
 
-        /* led */
+       /* led */
 
 if(strncmp(line, "led ", 4) == 0)
 {
@@ -200,6 +210,12 @@ if(strncmp(line, "led ", 4) == 0)
                 pin);
 
         strcat(target, temp);
+
+        /* Store LED pin for Arduino mode */
+
+        strcpy(ledPins[ledCount], name);
+        ledPinNumbers[ledCount] = pin;
+        ledCount++;
     }
 
     continue;
@@ -538,29 +554,65 @@ if(strncmp(line, "move ", 5) == 0)
 
     FILE *out = fopen("output.cpp", "w");
 
+    if(arduinoMode)
+{
+    fprintf(out,
+            "#include <Arduino.h>\n\n");
+}
+else
+{
     fprintf(out,
             "#include <iostream>\n");
     fprintf(out,
             "#include <string>\n");
     fprintf(out,
             "using namespace std;\n\n");
+}
 
     fprintf(out,
             "%s\n",
             functions);
 
+    if(arduinoMode)
+{
+    fprintf(out,
+            "void setup()\n{\n");
+}
+else
+{
     fprintf(out,
             "int main()\n{\n");
+}
+if(arduinoMode)
+{
+    for(int i = 0; i < ledCount; i++)
+    {
+        fprintf(out,
+                "    pinMode(%d, OUTPUT);\n",
+                ledPinNumbers[i]);
+    }
+
+    fprintf(out, "\n");
+}
 
     fprintf(out,
             "%s",
             mainCode);
 
+    if(!arduinoMode)
+{
     fprintf(out,
             "    return 0;\n");
+}
 
+fprintf(out,
+        "}\n");
+
+        if(arduinoMode)
+{
     fprintf(out,
-            "}\n");
+            "\nvoid loop()\n{\n}\n");
+}
 
     fclose(out);
 

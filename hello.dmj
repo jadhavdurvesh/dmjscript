@@ -1,9 +1,7 @@
-servo arm = 9
+hardware arduino
 
-move arm 0
+led status = 13
+
+on status
 wait 1000
-
-move arm 90
-wait 1000
-
-move arm 180
+off status

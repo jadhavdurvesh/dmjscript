@@ -1,16 +1,16 @@
-#include <iostream>
-#include <string>
-using namespace std;
+#include <Arduino.h>
 
 
-int main()
+void setup()
 {
-    Servo arm;
-    arm.attach(9);
-    arm.write(0);
+    pinMode(13, OUTPUT);
+
+    int status = 13;
+    digitalWrite(status, HIGH);
     delay(1000);
-    arm.write(90);
-    delay(1000);
-    arm.write(180);
-    return 0;
+    digitalWrite(status, LOW);
+}
+
+void loop()
+{
 }

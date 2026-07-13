@@ -1,17 +1,20 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
-void writeIndent(FILE *out, int indent)
+#define BUFFER_SIZE 50000
+
+void writeIndentToBuffer(char *buffer, int indent)
 {
     for(int i = 0; i < indent; i++)
     {
-        fprintf(out, "    ");
+        strcat(buffer, "    ");
     }
 }
 
-void appendText(char *dest, const char *src)
+void addLine(char *buffer, const char *text)
 {
-    strcat(dest, src);
+    strcat(buffer, text);
 }
 
 int main()
@@ -24,18 +27,20 @@ int main()
         return 1;
     }
 
-    FILE *out = fopen("output.cpp", "w");
+    char functions[BUFFER_SIZE] = "";
+    char mainCode[BUFFER_SIZE] = "";
 
-    char functions[10000] = "";
-int inFunction = 0;
-char currentFunction[50] = "";
-fprintf(out, "#include <iostream>\n");
-fprintf(out, "#include <string>\n");
-fprintf(out, "using namespace std;\n\n");
-
-    int indent = 1;
+    char ledPins[50][50];
+int ledPinNumbers[50];
+int ledCount = 0;
+    int inFunction = 0;
+    int arduinoMode = 0;
 
     char line[256];
+    char currentFunction[50];
+
+    int mainIndent = 1;
+    int functionIndent = 1;
 
     while(fgets(line, sizeof(line), src))
     {
@@ -46,13 +51,74 @@ fprintf(out, "using namespace std;\n\n");
 
         while(line[0] == ' ' || line[0] == '\t')
         {
-            memmove(line, line + 1, strlen(line));
+            memmove(line,
+                    line + 1,
+                    strlen(line));
         }
 
         if(strncmp(line, "--", 2) == 0)
             continue;
 
-        /* Variables */
+        char *target =
+            inFunction ? functions : mainCode;
+
+        int *indent =
+            inFunction ? &functionIndent : &mainIndent;
+/* hardware */
+
+if(strcmp(line, "hardware arduino") == 0)
+{
+    arduinoMode = 1;
+    continue;
+}
+        /* function */
+
+        if(strncmp(line, "function ", 9) == 0)
+        {
+            sscanf(line,
+                   "function %s",
+                   currentFunction);
+
+            char temp[256];
+
+            sprintf(temp,
+                    "\nvoid %s()\n{\n",
+                    currentFunction);
+
+            strcat(functions, temp);
+
+            inFunction = 1;
+            functionIndent = 1;
+
+            continue;
+        }
+
+        /* call */
+
+        if(strncmp(line, "call ", 5) == 0)
+        {
+            char name[50];
+
+            if(sscanf(line,
+                      "call %s",
+                      name) == 1)
+            {
+                writeIndentToBuffer(target,
+                                    *indent);
+
+                char temp[100];
+
+                sprintf(temp,
+                        "%s();\n",
+                        name);
+
+                strcat(target, temp);
+            }
+
+            continue;
+        }
+                /* string variable */
+
         if(strncmp(line, "var ", 4) == 0)
         {
             char name[50];
@@ -63,91 +129,235 @@ fprintf(out, "using namespace std;\n\n");
                       name,
                       value) == 2)
             {
-                writeIndent(out, indent);
+                writeIndentToBuffer(target,
+                                    *indent);
 
-                fprintf(out,
+                char temp[300];
+
+                sprintf(temp,
                         "string %s = \"%s\";\n",
                         name,
                         value);
 
+                strcat(target, temp);
+
                 continue;
             }
-char expr[200];
 
-if(sscanf(line,
-          "var %s = %[^\n]",
-          name,
-          expr) == 2)
-{
-    writeIndent(out, indent);
+            char expr[200];
 
-    if(strchr(expr, '+') ||
-       strchr(expr, '-') ||
-       strchr(expr, '*') ||
-       strchr(expr, '/'))
-    {
-        fprintf(out,
-                "int %s = %s;\n",
-                name,
-                expr);
-    }
-    else if(strchr(expr, '.'))
-    {
-        fprintf(out,
-                "double %s = %s;\n",
-                name,
-                expr);
-    }
-    else
-    {
-        fprintf(out,
-                "int %s = %s;\n",
-                name,
-                expr);
-    }
-
-    continue;
-}
+            if(sscanf(line,
+                      "var %s = %[^\n]",
+                      name,
+                      expr) == 2)
             {
-                writeIndent(out, indent);
+                writeIndentToBuffer(target,
+                                    *indent);
 
-                if(strchr(value, '.'))
+                char temp[300];
+
+                if(strchr(expr, '+') ||
+                   strchr(expr, '-') ||
+                   strchr(expr, '*') ||
+                   strchr(expr, '/'))
                 {
-                    fprintf(out,
+                    sprintf(temp,
+                            "int %s = %s;\n",
+                            name,
+                            expr);
+                }
+                else if(strchr(expr, '.'))
+                {
+                    sprintf(temp,
                             "double %s = %s;\n",
                             name,
-                            value);
+                            expr);
                 }
                 else
                 {
-                    fprintf(out,
+                    sprintf(temp,
                             "int %s = %s;\n",
                             name,
-                            value);
+                            expr);
                 }
+
+                strcat(target, temp);
 
                 continue;
             }
         }
 
-        /* function */
-if(strncmp(line, "function ", 9) == 0)
+       /* led */
+
+if(strncmp(line, "led ", 4) == 0)
 {
-    sscanf(line, "function %s", currentFunction);
+    char name[50];
+    int pin;
 
-    char temp[200];
+    if(sscanf(line,
+              "led %s = %d",
+              name,
+              &pin) == 2)
+    {
+        writeIndentToBuffer(target,
+                            *indent);
 
-    sprintf(temp,
-            "\nvoid %s()\n{\n",
-            currentFunction);
+        char temp[200];
 
-    appendText(functions, temp);
+        sprintf(temp,
+                "int %s = %d;\n",
+                name,
+                pin);
 
-    inFunction = 1;
+        strcat(target, temp);
+
+        /* Store LED pin for Arduino mode */
+
+        strcpy(ledPins[ledCount], name);
+        ledPinNumbers[ledCount] = pin;
+        ledCount++;
+    }
+
+    continue;
+}
+/* on */
+
+if(strncmp(line, "on ", 3) == 0)
+{
+    char name[50];
+
+    if(sscanf(line,
+              "on %s",
+              name) == 1)
+    {
+        writeIndentToBuffer(target,
+                            *indent);
+
+        char temp[200];
+
+        sprintf(temp,
+                "digitalWrite(%s, HIGH);\n",
+                name);
+
+        strcat(target, temp);
+    }
+
+    continue;
+}
+/* off */
+
+if(strncmp(line, "off ", 4) == 0)
+{
+    char name[50];
+
+    if(sscanf(line,
+              "off %s",
+              name) == 1)
+    {
+        writeIndentToBuffer(target,
+                            *indent);
+
+        char temp[200];
+
+        sprintf(temp,
+                "digitalWrite(%s, LOW);\n",
+                name);
+
+        strcat(target, temp);
+    }
+
+    continue;
+}
+/* wait */
+
+if(strncmp(line, "wait ", 5) == 0)
+{
+    int ms;
+
+    if(sscanf(line,
+              "wait %d",
+              &ms) == 1)
+    {
+        writeIndentToBuffer(target,
+                            *indent);
+
+        char temp[200];
+
+        sprintf(temp,
+                "delay(%d);\n",
+                ms);
+
+        strcat(target, temp);
+    }
+
+    continue;
+}
+/* servo */
+
+if(strncmp(line, "servo ", 6) == 0)
+{
+    char name[50];
+    int pin;
+
+    if(sscanf(line,
+              "servo %s = %d",
+              name,
+              &pin) == 2)
+    {
+        writeIndentToBuffer(target,
+                            *indent);
+
+        char temp[300];
+
+        sprintf(temp,
+                "Servo %s;\n",
+                name);
+
+        strcat(target, temp);
+
+        writeIndentToBuffer(target,
+                            *indent);
+
+        sprintf(temp,
+                "%s.attach(%d);\n",
+                name,
+                pin);
+
+        strcat(target, temp);
+    }
+
     continue;
 }
 
+/* move */
+
+if(strncmp(line, "move ", 5) == 0)
+{
+    char name[50];
+    int angle;
+
+    if(sscanf(line,
+              "move %s %d",
+              name,
+              &angle) == 2)
+    {
+        writeIndentToBuffer(target,
+                            *indent);
+
+        char temp[200];
+
+        sprintf(temp,
+                "%s.write(%d);\n",
+                name,
+                angle);
+
+        strcat(target, temp);
+    }
+
+    continue;
+}
         /* show text */
+
         if(strncmp(line, "show \"", 6) == 0)
         {
             char text[200];
@@ -156,144 +366,23 @@ if(strncmp(line, "function ", 9) == 0)
                       "show \"%[^\"]\"",
                       text) == 1)
             {
-                writeIndent(out, indent);
+                writeIndentToBuffer(target,
+                                    *indent);
 
-                fprintf(out,
+                char temp[300];
+
+                sprintf(temp,
                         "cout << \"%s\" << endl;\n",
                         text);
+
+                strcat(target, temp);
             }
 
             continue;
         }
-
-        /* ask */
-        if(strncmp(line, "ask ", 4) == 0)
-        {
-            char name[50];
-
-            if(sscanf(line,
-                      "ask %s",
-                      name) == 1)
-            {
-                writeIndent(out, indent);
-                fprintf(out,
-                        "string %s;\n",
-                        name);
-
-                writeIndent(out, indent);
-                fprintf(out,
-                        "getline(cin, %s);\n",
-                        name);
-            }
-
-            continue;
-        }
-
-        /* if */
-        if(strncmp(line, "if ", 3) == 0)
-        {
-            char condition[200];
-
-            strcpy(condition, line + 3);
-
-            char *thenPos = strstr(condition, " then");
-
-            if(thenPos != NULL)
-                *thenPos = '\0';
-
-            writeIndent(out, indent);
-            fprintf(out,
-                    "if(%s)\n",
-                    condition);
-
-            writeIndent(out, indent);
-            fprintf(out, "{\n");
-
-            indent++;
-
-            continue;
-        }
-
-        /* else */
-        if(strcmp(line, "else") == 0)
-        {
-            indent--;
-
-            writeIndent(out, indent);
-            fprintf(out, "}\n");
-
-            writeIndent(out, indent);
-            fprintf(out, "else\n");
-
-            writeIndent(out, indent);
-            fprintf(out, "{\n");
-
-            indent++;
-
-            continue;
-        }
-
-        /* repeat */
-        if(strncmp(line, "repeat ", 7) == 0)
-        {
-            int count;
-
-            if(sscanf(line,
-                      "repeat %d",
-                      &count) == 1)
-            {
-                writeIndent(out, indent);
-
-                fprintf(out,
-                        "for(int i = 0; i < %d; i++)\n",
-                        count);
-
-                writeIndent(out, indent);
-                fprintf(out, "{\n");
-
-                indent++;
-            }
-
-            continue;
-        }
-
-        /* end */
-if(strcmp(line, "end") == 0)
-{
-    if(inFunction)
-    {
-        appendText(functions, "}\n");
-        inFunction = 0;
-    }
-    else
-    {
-        indent--;
-
-        writeIndent(out, indent);
-        fprintf(out, "}\n");
-    }
-
-    continue;
-}
-
-        /* call function */
-if(strncmp(line, "call ", 5) == 0)
-{
-    char name[50];
-
-    if(sscanf(line, "call %s", name) == 1)
-    {
-        writeIndent(out, indent);
-
-        fprintf(out,
-                "%s();\n",
-                name);
-    }
-
-    continue;
-}
 
         /* show variable */
+
         if(strncmp(line, "show ", 5) == 0 &&
            line[5] != '"')
         {
@@ -303,30 +392,231 @@ if(strncmp(line, "call ", 5) == 0)
                       "show %s",
                       name) == 1)
             {
-                writeIndent(out, indent);
+                writeIndentToBuffer(target,
+                                    *indent);
 
-                fprintf(out,
+                char temp[200];
+
+                sprintf(temp,
                         "cout << %s << endl;\n",
                         name);
+
+                strcat(target, temp);
+            }
+
+            continue;
+        }
+
+        /* ask */
+
+        if(strncmp(line, "ask ", 4) == 0)
+        {
+            char name[50];
+
+            if(sscanf(line,
+                      "ask %s",
+                      name) == 1)
+            {
+                writeIndentToBuffer(target,
+                                    *indent);
+
+                char temp[300];
+
+                sprintf(temp,
+                        "string %s;\n",
+                        name);
+
+                strcat(target, temp);
+
+                writeIndentToBuffer(target,
+                                    *indent);
+
+                sprintf(temp,
+                        "getline(cin, %s);\n",
+                        name);
+
+                strcat(target, temp);
+            }
+
+            continue;
+        }
+                /* if */
+
+        if(strncmp(line, "if ", 3) == 0)
+        {
+            char condition[200];
+
+            strcpy(condition, line + 3);
+
+            char *thenPos = strstr(condition,
+                                   " then");
+
+            if(thenPos != NULL)
+                *thenPos = '\0';
+
+            writeIndentToBuffer(target,
+                                *indent);
+
+            strcat(target, "if(");
+            strcat(target, condition);
+            strcat(target, ")\n");
+
+            writeIndentToBuffer(target,
+                                *indent);
+
+            strcat(target, "{\n");
+
+            (*indent)++;
+
+            continue;
+        }
+
+        /* else */
+
+        if(strcmp(line, "else") == 0)
+        {
+            (*indent)--;
+
+            writeIndentToBuffer(target,
+                                *indent);
+
+            strcat(target, "}\n");
+
+            writeIndentToBuffer(target,
+                                *indent);
+
+            strcat(target, "else\n");
+
+            writeIndentToBuffer(target,
+                                *indent);
+
+            strcat(target, "{\n");
+
+            (*indent)++;
+
+            continue;
+        }
+
+        /* repeat */
+
+        if(strncmp(line, "repeat ", 7) == 0)
+        {
+            int count;
+
+            if(sscanf(line,
+                      "repeat %d",
+                      &count) == 1)
+            {
+                writeIndentToBuffer(target,
+                                    *indent);
+
+                char temp[200];
+
+                sprintf(temp,
+                        "for(int i = 0; i < %d; i++)\n",
+                        count);
+
+                strcat(target, temp);
+
+                writeIndentToBuffer(target,
+                                    *indent);
+
+                strcat(target, "{\n");
+
+                (*indent)++;
+            }
+
+            continue;
+        }
+
+        /* end */
+
+        if(strcmp(line, "end") == 0)
+        {
+            (*indent)--;
+
+            writeIndentToBuffer(target,
+                                *indent);
+
+            strcat(target, "}\n");
+
+            if(inFunction && *indent == 0)
+            {
+                inFunction = 0;
+                functionIndent = 1;
             }
 
             continue;
         }
     }
 
-    fprintf(out, "%s\n", functions);
-
-fprintf(out, "int main()\n{\n");
-
-writeIndent(out, 1);
-fprintf(out, "return 0;\n");
-
-fprintf(out, "}\n");
-
     fclose(src);
+
+    FILE *out = fopen("output.cpp", "w");
+
+    if(arduinoMode)
+{
+    fprintf(out,
+            "#include <Arduino.h>\n\n");
+}
+else
+{
+    fprintf(out,
+            "#include <iostream>\n");
+    fprintf(out,
+            "#include <string>\n");
+    fprintf(out,
+            "using namespace std;\n\n");
+}
+
+    fprintf(out,
+            "%s\n",
+            functions);
+
+    if(arduinoMode)
+{
+    fprintf(out,
+            "void setup()\n{\n");
+}
+else
+{
+    fprintf(out,
+            "int main()\n{\n");
+}
+if(arduinoMode)
+{
+    for(int i = 0; i < ledCount; i++)
+    {
+        fprintf(out,
+                "    pinMode(%d, OUTPUT);\n",
+                ledPinNumbers[i]);
+    }
+
+    fprintf(out, "\n");
+}
+
+    fprintf(out,
+            "%s",
+            mainCode);
+
+    if(!arduinoMode)
+{
+    fprintf(out,
+            "    return 0;\n");
+}
+
+fprintf(out,
+        "}\n");
+
+        if(arduinoMode)
+{
+    fprintf(out,
+            "\nvoid loop()\n{\n}\n");
+}
+
     fclose(out);
 
-    printf("DMJScript compilation successful!\n");
+    printf("DMJScript v1.0 compilation successful!\n");
 
     return 0;
 }
