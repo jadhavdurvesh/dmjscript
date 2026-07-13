@@ -17,9 +17,15 @@ void addLine(char *buffer, const char *text)
     strcat(buffer, text);
 }
 
-int main()
+int main(int argc, char *argv[])
 {
-    FILE *src = fopen("hello.dmj", "r");
+    if(argc < 2)
+{
+    printf("Usage: dmjc <file.dmj>\n");
+    return 1;
+}
+
+FILE *src = fopen(argv[1], "r");
 
     if(src == NULL)
     {
@@ -552,7 +558,22 @@ if(strncmp(line, "move ", 5) == 0)
 
     fclose(src);
 
-    FILE *out = fopen("output.cpp", "w");
+    char outputFile[256];
+
+strcpy(outputFile, argv[1]);
+
+char *dot = strrchr(outputFile, '.');
+
+if(dot != NULL)
+{
+    strcpy(dot, ".cpp");
+}
+else
+{
+    strcat(outputFile, ".cpp");
+}
+
+FILE *out = fopen(outputFile, "w");
 
     if(arduinoMode)
 {
@@ -616,7 +637,8 @@ fprintf(out,
 
     fclose(out);
 
-    printf("DMJScript v1.0 compilation successful!\n");
+   printf("Generated: %s\n", outputFile);
+printf("DMJScript v1.0 compilation successful!\n"); 
 
     return 0;
 }

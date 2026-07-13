@@ -1,0 +1,7 @@
+function greet
+
+    show "Hello from DMJScript"
+
+end
+
+call greet

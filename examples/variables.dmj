@@ -1,0 +1,7 @@
+var name = "Durvesh"
+var age = 17
+var voltage = 4.75
+
+show name
+show age
+show voltage

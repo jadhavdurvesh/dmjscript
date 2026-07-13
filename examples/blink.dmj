@@ -1,0 +1,7 @@
+hardware arduino
+
+led status = 13
+
+on status
+wait 1000
+off status

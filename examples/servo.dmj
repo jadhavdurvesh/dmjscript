@@ -1,0 +1,11 @@
+hardware arduino
+
+servo arm = 9
+
+move arm 0
+wait 1000
+
+move arm 90
+wait 1000
+
+move arm 180
