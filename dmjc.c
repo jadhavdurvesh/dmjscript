@@ -26,12 +26,13 @@ int main()
         if(strncmp(line, "--", 2) == 0)
             continue;
 
-        /* String variable */
+        /* Variables */
         if(strncmp(line, "var ", 4) == 0)
         {
             char name[50];
             char value[200];
 
+            /* String */
             if(sscanf(line,
                       "var %s = \"%[^\"]\"",
                       name,
@@ -45,6 +46,7 @@ int main()
                 continue;
             }
 
+            /* Number */
             if(sscanf(line,
                       "var %s = %s",
                       name,
@@ -69,7 +71,7 @@ int main()
             }
         }
 
-        /* show "text" */
+        /* show text */
         if(strncmp(line, "show \"", 6) == 0)
         {
             char text[200];
@@ -81,6 +83,25 @@ int main()
                 fprintf(out,
                         "    cout << \"%s\" << endl;\n",
                         text);
+            }
+
+            continue;
+        }
+
+        /* ask variable */
+        if(strncmp(line, "ask ", 4) == 0)
+        {
+            char name[50];
+
+            if(sscanf(line,
+                      "ask %s",
+                      name) == 1)
+            {
+                fprintf(out,
+                        "    string %s;\n"
+                        "    getline(cin, %s);\n",
+                        name,
+                        name);
             }
 
             continue;
