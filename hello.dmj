@@ -1,12 +1,13 @@
-show "Math Test"
+function greet
+    show "Hello from function"
+end
 
-var a = 10
-var b = 20
+show "Start"
 
-var total = a + b
-var diff = b - a
-var mul = a * b
+call greet
 
-show total
-show diff
-show mul
+repeat 2
+    show "Loop"
+end
+
+show "End"

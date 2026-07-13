@@ -9,11 +9,6 @@ void writeIndent(FILE *out, int indent)
     }
 }
 
-void appendText(char *dest, const char *src)
-{
-    strcat(dest, src);
-}
-
 int main()
 {
     FILE *src = fopen("hello.dmj", "r");
@@ -26,12 +21,10 @@ int main()
 
     FILE *out = fopen("output.cpp", "w");
 
-    char functions[10000] = "";
-int inFunction = 0;
-char currentFunction[50] = "";
-fprintf(out, "#include <iostream>\n");
-fprintf(out, "#include <string>\n");
-fprintf(out, "using namespace std;\n\n");
+    fprintf(out, "#include <iostream>\n");
+    fprintf(out, "#include <string>\n");
+    fprintf(out, "using namespace std;\n\n");
+    fprintf(out, "int main()\n{\n");
 
     int indent = 1;
 
@@ -129,23 +122,6 @@ if(sscanf(line,
                 continue;
             }
         }
-
-        /* function */
-if(strncmp(line, "function ", 9) == 0)
-{
-    sscanf(line, "function %s", currentFunction);
-
-    char temp[200];
-
-    sprintf(temp,
-            "\nvoid %s()\n{\n",
-            currentFunction);
-
-    appendText(functions, temp);
-
-    inFunction = 1;
-    continue;
-}
 
         /* show text */
         if(strncmp(line, "show \"", 6) == 0)
@@ -258,40 +234,15 @@ if(strncmp(line, "function ", 9) == 0)
         }
 
         /* end */
-if(strcmp(line, "end") == 0)
-{
-    if(inFunction)
-    {
-        appendText(functions, "}\n");
-        inFunction = 0;
-    }
-    else
-    {
-        indent--;
+        if(strcmp(line, "end") == 0)
+        {
+            indent--;
 
-        writeIndent(out, indent);
-        fprintf(out, "}\n");
-    }
+            writeIndent(out, indent);
+            fprintf(out, "}\n");
 
-    continue;
-}
-
-        /* call function */
-if(strncmp(line, "call ", 5) == 0)
-{
-    char name[50];
-
-    if(sscanf(line, "call %s", name) == 1)
-    {
-        writeIndent(out, indent);
-
-        fprintf(out,
-                "%s();\n",
-                name);
-    }
-
-    continue;
-}
+            continue;
+        }
 
         /* show variable */
         if(strncmp(line, "show ", 5) == 0 &&
@@ -314,14 +265,12 @@ if(strncmp(line, "call ", 5) == 0)
         }
     }
 
-    fprintf(out, "%s\n", functions);
+    fprintf(out, "\n");
 
-fprintf(out, "int main()\n{\n");
+    writeIndent(out, 1);
+    fprintf(out, "return 0;\n");
 
-writeIndent(out, 1);
-fprintf(out, "return 0;\n");
-
-fprintf(out, "}\n");
+    fprintf(out, "}\n");
 
     fclose(src);
     fclose(out);
