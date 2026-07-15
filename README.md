@@ -1,129 +1,43 @@
 # DMJScript
 
-A beginner-friendly programming language created by Durvesh Jadhav.
+A beginner-friendly programming language focused on robotics, electronics, Arduino, and embedded systems.
 
-DMJScript is designed to make programming simple while providing built-in support for robotics, electronics, embedded systems, and Arduino development.
+![Version](https://img.shields.io/badge/version-1.0.0-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
+![Language](https://img.shields.io/badge/language-DMJScript-orange)
 
-Version: 1.0.0
+---
+
+## What is DMJScript?
+
+DMJScript is a programming language created to make learning programming and hardware development easier.
+
+The language focuses on:
+
+- Arduino Development
+- Robotics
+- Electronics
+- Embedded Systems
+- Mechatronics Projects
+- Beginner-Friendly Syntax
+
+DMJScript source files use the `.dmj` extension.
 
 ---
 
 ## Features
 
-### Core Language
-
-- Variables
-- Strings
-- Integers
-- Decimal Numbers
-- User Input
-- Output
-- Conditions
-- Loops
-- Functions
-- Math Expressions
-
-### Hardware Features
-
-- Arduino Mode
-- LED Control
-- Servo Control
-- Delays
-
----
-
-## Hello World
-
-DMJScript:
-
-```dmj
-show "Hello World"
-```
-
-Generated C++:
-
-```cpp
-cout << "Hello World" << endl;
-```
-
----
-
-## Variables
-
-### String
+### Variables
 
 ```dmj
 var name = "Durvesh"
-show name
-```
-
-### Integer
-
-```dmj
 var age = 17
+
+show name
 show age
 ```
 
-### Decimal
-
-```dmj
-var voltage = 4.75
-show voltage
-```
-
----
-
-## User Input
-
-```dmj
-ask name
-show name
-```
-
----
-
-## Conditions
-
-```dmj
-var age = 18
-
-if age >= 18 then
-    show "Adult"
-else
-    show "Minor"
-end
-```
-
----
-
-## Loops
-
-```dmj
-repeat 3
-    show "Hello"
-end
-```
-
----
-
-## Math Expressions
-
-```dmj
-var a = 10
-var b = 20
-
-var total = a + b
-var difference = b - a
-var multiply = a * b
-
-show total
-show difference
-show multiply
-```
-
----
-
-## Functions
+### Functions
 
 ```dmj
 function greet
@@ -135,19 +49,33 @@ end
 call greet
 ```
 
----
-
-# Arduino Mode
-
-DMJScript can generate Arduino-compatible code.
-
-## Blink Example
-
-DMJScript:
+### Conditions
 
 ```dmj
-hardware arduino
+if age >= 18 then
 
+    show "Adult"
+
+else
+
+    show "Minor"
+
+end
+```
+
+### Loops
+
+```dmj
+repeat 3
+
+    show "Hello"
+
+end
+```
+
+### Hardware Control
+
+```dmj
 led status = 13
 
 on status
@@ -155,196 +83,164 @@ wait 1000
 off status
 ```
 
-Generated Arduino Sketch:
-
-```cpp
-#include <Arduino.h>
-
-void setup()
-{
-    pinMode(13, OUTPUT);
-
-    int status = 13;
-
-    digitalWrite(status, HIGH);
-    delay(1000);
-    digitalWrite(status, LOW);
-}
-
-void loop()
-{
-}
-```
-
----
-
-## LED Control
-
-```dmj
-led status = 13
-
-on status
-off status
-```
-
----
-
-## Servo Control
+### Servo Control
 
 ```dmj
 servo arm = 9
 
-move arm 0
-wait 1000
-
 move arm 90
-wait 1000
-
-move arm 180
-```
-
-Generated:
-
-```cpp
-Servo arm;
-arm.attach(9);
-
-arm.write(0);
-delay(1000);
-
-arm.write(90);
-delay(1000);
-
-arm.write(180);
 ```
 
 ---
 
-## Delay
+## Installation
 
-```dmj
-wait 1000
+Clone the repository:
+
+```bash
+git clone https://github.com/jadhavdurvesh/dmjscript.git
+cd dmjscript
 ```
 
-Generated:
-
-```cpp
-delay(1000);
-```
-
----
-
-# Build Instructions
-
-Compile the DMJScript compiler:
+Compile the compiler:
 
 ```bash
 gcc dmjc.c -o dmjc
 ```
 
-Run the compiler:
+---
 
-```bash
-./dmjc
-```
+## First Program
 
-Generated output:
+Create:
 
 ```text
-output.cpp
+hello.dmj
 ```
 
-Compile generated C++:
+Contents:
+
+```dmj
+show "Hello World"
+```
+
+Compile:
 
 ```bash
-g++ output.cpp -o hello
+./dmjc hello.dmj
+```
+
+Build:
+
+```bash
+g++ output.cpp -o output
 ```
 
 Run:
 
 ```bash
-./hello
+./output
+```
+
+Output:
+
+```text
+Hello World
 ```
 
 ---
 
-# Example Program
+## Documentation
 
-```dmj
-function greet
+Documentation is available in the `docs` folder.
 
-    show "Welcome to DMJScript"
-
-end
-
-show "Start"
-
-call greet
-
-repeat 3
-    show "Running..."
-end
-
-show "End"
-```
-
----
-
-# Roadmap
-
-## Completed
-
+- Getting Started
 - Variables
-- Strings
-- Numbers
-- Input
-- Output
-- Conditions
-- Loops
-- Math Expressions
 - Functions
-- Arduino Mode
-- LED Support
-- Servo Support
-- Delays
+- Hardware Support
 
-## Future Plans
+---
 
-### v1.1
+## Examples
 
-- Buzzer Support
+Example programs can be found in:
 
-### v1.2
+```text
+examples/
+```
 
-- Ultrasonic Sensor Support
+Current examples:
 
-### v1.3
+```text
+hello.dmj
+variables.dmj
+functions.dmj
+blink.dmj
+servo.dmj
+```
 
-- LCD Display Support
+---
 
-### v1.4
+## Project Structure
 
-- ESP8266 WiFi Support
+```text
+dmjscript/
+├── README.md
+├── LICENSE
+├── spec.md
+├── dmjc.c
+├── docs/
+├── examples/
+├── generated/
+└── archive/
+```
 
-### v2.0
+---
 
+## Roadmap
+
+### Version 1.1
+
+- Better Hardware Support
+- Buzzer Control
+- Sensor Support
+- Additional Examples
+
+### Version 1.2
+
+- Arrays
+- Enhanced Functions
+- Standard Library
+
+### Version 2.0
+
+- ESP32 Support
 - Raspberry Pi Support
+- Package Manager
+- DMJ IDE
 
 ---
 
-# License
+## VS Code Extension
 
-This project is licensed under the MIT License.
+Official VS Code extension:
 
-See the LICENSE file for details.
+https://marketplace.visualstudio.com/items?itemName=durveshjadhav.dmjscript
+
+Repository:
+
+https://github.com/jadhavdurvesh/dmjscript-vscode
 
 ---
 
-# Creator
+## Author
 
 Durvesh Jadhav
 
-GitHub:
-https://github.com/jadhavdurvesh
+---
 
-Created with C and built for learning programming, robotics, and embedded systems.
+## License
+
+MIT License
+
+Copyright (c) 2026 Durvesh Jadhav
