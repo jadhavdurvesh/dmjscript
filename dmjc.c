@@ -17,19 +17,34 @@ void addLine(char *buffer, const char *text)
     strcat(buffer, text);
 }
 
+int runMode = 0;
+
 int main(int argc, char *argv[])
 {
     if(argc < 2)
-{
-    printf("Usage: dmjc <file.dmj>\n");
-    return 1;
-}
+    {
+        printf("Usage: dmjc <file.dmj>\n");
+        printf("Usage: dmjc run <file.dmj>\n");
+        return 1;
+    }
 
-FILE *src = fopen(argv[1], "r");
+    if(argc == 3 && strcmp(argv[1], "run") == 0)
+    {
+        runMode = 1;
+    }
+
+char *sourceFile;
+
+if(runMode)
+    sourceFile = argv[2];
+else
+    sourceFile = argv[1];
+
+FILE *src = fopen(sourceFile, "r");
 
     if(src == NULL)
     {
-        printf("Cannot open hello.dmj\n");
+        printf("Cannot open %s\n", sourceFile);
         return 1;
     }
 
@@ -135,6 +150,8 @@ if(strcmp(line, "hardware arduino") == 0)
                       name,
                       value) == 2)
             {
+
+                
                 writeIndentToBuffer(target,
                                     *indent);
 
@@ -157,6 +174,27 @@ if(strcmp(line, "hardware arduino") == 0)
                       name,
                       expr) == 2)
             {
+                if(expr[0] == '[')
+{
+    writeIndentToBuffer(target,
+                        *indent);
+
+    char temp[500];
+
+    char values[300];
+    strcpy(values, expr);
+
+    values[strlen(values)-1] = '\0';
+
+    sprintf(temp,
+            "vector<int> %s = {%s};\n",
+            name,
+            values + 1);
+
+    strcat(target, temp);
+
+    continue;
+}
                 writeIndentToBuffer(target,
                                     *indent);
 
@@ -583,11 +621,13 @@ FILE *out = fopen(outputFile, "w");
 else
 {
     fprintf(out,
-            "#include <iostream>\n");
-    fprintf(out,
-            "#include <string>\n");
-    fprintf(out,
-            "using namespace std;\n\n");
+        "#include <iostream>\n");
+fprintf(out,
+        "#include <string>\n");
+fprintf(out,
+        "#include <vector>\n");
+fprintf(out,
+        "using namespace std;\n\n");
 }
 
     fprintf(out,
@@ -639,6 +679,17 @@ fprintf(out,
 
    printf("Generated: %s\n", outputFile);
 printf("DMJScript v1.0 compilation successful!\n"); 
+
+if(runMode)
+{
+    printf("Compiling...\n");
+
+    system("g++ run.cpp -o run");
+
+    printf("Running...\n");
+
+    system("./run");
+}
 
     return 0;
 }

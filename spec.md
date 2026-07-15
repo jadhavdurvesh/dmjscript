@@ -46,3 +46,22 @@ wait 1000
 
 servo arm = 9
 move arm 90
+
+## Arrays
+
+Arrays store multiple values in a single variable.
+
+Example:
+
+```dmj
+var numbers = [10, 20, 30]
+
+show numbers
+```
+
+Future support:
+
+```dmj
+show numbers[0]
+show numbers[1]
+```
