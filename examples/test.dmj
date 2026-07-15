@@ -1,1 +1,5 @@
-show "DMJScript Run Mode Works!"
+var nums = [10, 20, 30]
+
+show nums[0]
+show nums[1]
+show nums[2]

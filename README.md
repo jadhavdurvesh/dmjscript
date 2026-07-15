@@ -197,6 +197,27 @@ dmjscript/
 
 ---
 
+
+## New Features
+
+### Arrays
+
+```dmj
+var numbers = [10, 20, 30]
+```
+
+### Run Mode
+
+```bash
+./dmjc run examples/test.dmj
+```
+
+Automatically:
+1. Compiles DMJScript
+2. Generates C++
+3. Builds executable
+4. Runs program
+
 ## Roadmap
 
 ### Version 1.1
